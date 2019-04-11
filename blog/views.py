@@ -3,6 +3,8 @@ from django.shortcuts import render
 
 # Create your views here.
 from blog.models import Post
+from comment.forms import CommentForm
+from comment.models import Comment
 
 
 def index(request):
@@ -24,10 +26,20 @@ def index(request):
 
 def detail(request,id):
     post=Post.objects.filter(id=id).first()
+    post.read_num+=1
+    post.save()
 
+    form =CommentForm()
+    comments=Comment.objects.filter(post=id).all()
 
+    commentsPageObj = get_pageObj(request, comments)
+    comments = commentsPageObj.object_list
+    print(comments)
     return render(request,'blog/detaile.html',context={
-        'post':post
+        'post':post,
+        'form':form,
+        'comments':comments,
+        'commentsPageObj':commentsPageObj
     })
 
 def get_pageObj(request,posts):
